@@ -24,6 +24,15 @@ abstract class HttpClient {
 class HttpClientSpy extends Mock implements HttpClient {}
 
 void main() {
+  RemoveAuthentication sut;
+  HttpClientSpy httpClient;
+  String url;
+
+  setUp(() {
+    httpClient = HttpClientSpy();
+    url = faker.internet.httpUrl();
+    sut = RemoveAuthentication(httpClient: httpClient, url: url);
+  });
   test('Shuld call HttpClient with correct values', () async {
     final httpClient = HttpClientSpy();
     final url = faker.internet.httpUrl();
