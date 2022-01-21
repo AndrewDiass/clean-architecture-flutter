@@ -1,7 +1,11 @@
+import 'dart:html';
+
 import 'package:faker/faker.dart';
 import 'package:mockito/mockito.dart';
 import 'package:meta/meta.dart';
 import 'package:test/test.dart';
+
+import 'package:manguinho_app/domains/usecases/usecases.dart';
 
 class RemoveAuthentication {
   final HttpClient httpClient;
@@ -9,8 +13,12 @@ class RemoveAuthentication {
 
   RemoveAuthentication({@required this.httpClient, @required this.url});
 
-  Future<void> auth() async {
-    await httpClient.request(url: url, method: 'post');
+  Future<void> auth(AuthenticationParams params) async {
+    final body = {
+      'email': params.email,
+      'password': params.secret,
+    };
+    await httpClient.request(url: url, method: 'post', body: body);
   }
 }
 
@@ -18,6 +26,7 @@ abstract class HttpClient {
   Future<void> request({
     @required String url,
     @required String method,
+    Map body,
   });
 }
 
@@ -34,13 +43,15 @@ void main() {
     sut = RemoveAuthentication(httpClient: httpClient, url: url);
   });
   test('Shuld call HttpClient with correct values', () async {
-    final httpClient = HttpClientSpy();
-    final url = faker.internet.httpUrl();
-    final sut = RemoveAuthentication(httpClient: httpClient, url: url);
-    sut.auth();
+    final params = AuthenticationParams(
+        email: faker.internet.email(), secret: faker.internet.password());
+    sut.auth(params);
 
     verify(
-      httpClient.request(url: url, method: 'post'),
+      httpClient.request(
+          url: url,
+          method: 'post',
+          body: {'email': params.email, 'password': params.secret}),
     );
   });
 }
